@@ -42,47 +42,51 @@ If you have Movies with a textual title, categotized by genre, studio and year .
 You can then declare the structure of your search like so:
 
 ```ruby
-    class HomeController < ApplicationController
+class HomeController < ApplicationController
 
-      class MovieSearch < FortyFacets::FacetSearch
-        model 'Movie' # which model to search for
-        text :title   # filter by a generic string entered by the user
-        facet :genre, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
-        facet :year, name: 'Releaseyear', order: :year # additionally oder values in the year field
-        facet :studio, name: 'Studio', order: :name
-      end
+  class MovieSearch < FortyFacets::FacetSearch
+    model 'Movie' # which model to search for
+    text :title   # filter by a generic string entered by the user
+    facet :genre, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
+    facet :year, name: 'Releaseyear', order: :year # additionally oder values in the year field
+    facet :studio, name: 'Studio', order: :name
+  end
 
-      def index
-        @search = MovieSearch.new(params) # this initializes your search object from the request params
-        @movies = @search.result.paginate(page: params[:page], per_page: 5) # optionally paginate through your results
-      end
+  def index
+    @search = MovieSearch.new(params) # this initializes your search object from the request params
+    @movies = @search.result.paginate(page: params[:page], per_page: 5) # optionally paginate through your results
+  end
 ```
 
 In your view you can iterate the result like any other ActiveRecord collection
 
-    %table.table.table-condensed
-      %tbody
-        - @movies.each do |movie|
-          %tr
-            %td
-              %strong=movie.title
+```haml
+%table.table.table-condensed
+  %tbody
+    - @movies.each do |movie|
+      %tr
+        %td
+          %strong=movie.title
+```
 
 Use the search object to display further narrowing options to the user
 
-      - filter = @search.filter(:genre)
-      .col-md-4
-        .filter
-          .filter-title= filter.name
-          .filter-values
-            %ul.selected
-              - filter.selected.each do |genre|
-                %li= link_to genre.name, filter.remove(genre).path
-            %ul.selectable
-              - filter.facet.reject(&:selected).each do |facet_value|
-                - genre = facet_value.genre
-                %li
-                  = link_to genre.name, filter.add(genre).path
-                  %span.count= "(#{facet_value.count})"
+```haml
+- filter = @search.filter(:genre)
+.col-md-4
+  .filter
+    .filter-title= filter.name
+    .filter-values
+      %ul.selected
+        - filter.selected.each do |genre|
+          %li= link_to genre.name, filter.remove(genre).path
+      %ul.selectable
+        - filter.facet.reject(&:selected).each do |facet_value|
+          - genre = facet_value.genre
+          %li
+            = link_to genre.name, filter.add(genre).path
+            %span.count= "(#{facet_value.count})"
+```
 
 ## Contributing
 
