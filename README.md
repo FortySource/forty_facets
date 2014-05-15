@@ -40,6 +40,8 @@ If you have Movies with a textual title, categotized by genre, studio and year .
     end
 
 You can then declare the structure of your search like so:
+
+```ruby
     class HomeController < ApplicationController
 
       class MovieSearch < FortyFacets::FacetSearch
@@ -54,6 +56,7 @@ You can then declare the structure of your search like so:
         @search = MovieSearch.new(params) # this initializes your search object from the request params
         @movies = @search.result.paginate(page: params[:page], per_page: 5) # optionally paginate through your results
       end
+```
 
 In your view you can iterate the result like any other ActiveRecord collection
 
