@@ -1,5 +1,6 @@
 require "forty_facets/version"
 
 module FortyFacets
-  # Your code goes here...
 end
+
+require "forty_facets/facet_search"
