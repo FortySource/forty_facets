@@ -36,7 +36,7 @@ module FortyFacets
         end
 
         def expression_value(term)
-          if options[:prefix]
+          if field_definition.options[:prefix]
            "#{term}%"
           else
            "%#{term}%"
@@ -83,11 +83,20 @@ module FortyFacets
           my_column = association.association_foreign_key
           counts = without.result.select("#{my_column} as foreign_id, count(#{my_column}) as occurrences").group(my_column)
           entities_by_id = klass.find(counts.map(&:foreign_id)).group_by(&:id)
-          counts.inject([]) do |sum, count|
+          facet = counts.inject([]) do |sum, count|
             facet_entity = entities_by_id[count.foreign_id].first
             is_selected = selected.include?(facet_entity)
             sum << FacetValue.new(facet_entity, count.occurrences, is_selected)
           end
+
+          order_accessor = field_definition.options[:order]
+          if order_accessor
+            facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+          else
+            facet.sort_by!{|facet_value| -facet_value.count }
+          end
+          facet
+
         end
 
         def without
