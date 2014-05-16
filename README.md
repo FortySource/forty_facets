@@ -4,6 +4,8 @@ FortyFacets lets you easily build explorative search interfaces based on fields 
 
 ![demo](demo.gif)
 
+Try a [working demo](http://forty-facets-demo.herokuapp.com/ "Testinstallation on heroku")!
+
 It offers a simple API to create an interactive UI to browse your data by iteratively adding
 filter values.
 
