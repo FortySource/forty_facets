@@ -90,6 +90,12 @@ Use the search object to display further narrowing options to the user
             %span.count= "(#{facet_value.count})"
 ```
 
+## FAQ
+
+### Can I create filter for `has_many` associations ?
+
+No. At the moment only objects directly related via a `belongs_to` can be used as filter.
+
 ## Contributing
 
 1. Fork it ( http://github.com/<my-github-username>/forty_facets/fork )
