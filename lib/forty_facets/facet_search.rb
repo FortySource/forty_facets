@@ -1,6 +1,7 @@
 module FortyFacets
   class FacetSearch
-    attr_reader :filters
+    attr_reader :filters, :orders
+
 
     FieldDefinition = Struct.new(:search, :model_field, :options) do
       def request_param
@@ -27,6 +28,42 @@ module FortyFacets
       end
     end
 
+    class RangeField < FieldDefinition
+      class RangeFilter < Filter
+        def build_scope
+          return Proc.new { |base| base } if empty?
+          Proc.new {  |base| base.where("#{field_definition.model_field} >= ? AND #{field_definition.model_field} <= ? ", min_value, max_value ) }
+        end
+
+        def min_value
+          return nil if empty?
+          value.split(' - ').first
+        end
+
+        def max_value
+          return nil if empty?
+          value.split(' - ').last
+        end
+
+        def absolute_interval
+          @abosultes ||= without.result.select("min(#{field_definition.model_field}) as min, max(#{field_definition.model_field}) as max").first
+        end
+
+        def absolute_min
+          absolute_interval.min
+        end
+
+        def absolute_max
+          absolute_interval.max
+        end
+
+      end
+
+      def build_filter(search_instance, value)
+        RangeFilter.new(self, search_instance, value)
+      end
+    end
+
     class TextField < FieldDefinition
       class TextFilter < Filter
         def build_scope
@@ -41,10 +78,6 @@ module FortyFacets
           else
            "%#{term}%"
           end
-        end
-
-        def display_value
-          value
         end
       end
 
@@ -137,8 +170,38 @@ module FortyFacets
         definitions << TextField.new(self, model_field, opts)
       end
 
+      def range(model_field, opts = {})
+        definitions << RangeField.new(self, model_field, opts)
+      end
+
       def facet(model_field, opts = {})
         definitions << FacetField.new(self, model_field, opts)
+      end
+
+      OrderDefinition = Struct.new(:title, :clause) do
+        def build(search, order_param)
+          Order.new(search, self, order_param == title.to_s)
+        end
+
+        def request_value
+          title
+        end
+      end
+
+      Order = Struct.new(:search, :definition, :active) do
+        def title
+          definition.title
+        end
+
+        def by
+          new_params = search.params || {}
+          new_params[:order] = definition.request_value
+          search.class.new_unwrapped(new_params)
+        end
+      end
+
+      def orders(name_and_order_options)
+        @order_definitions = name_and_order_options.to_a.inject([]) {|ods, no| ods << OrderDefinition.new(no.first, no.last)}
       end
 
       def definitions
@@ -161,6 +224,10 @@ module FortyFacets
       def request_param_name
         @request_param_name ||= 'search'
       end
+
+      def order_definitions
+        @order_definitions
+      end
     end
 
     def initialize(request_params)
@@ -169,9 +236,14 @@ module FortyFacets
                else
                  {}
                end
-      @filters = self.class.definitions.inject([]) do |sum, definition|
-        sum << definition.build_filter(self, params[definition.request_param])
+      @filters = self.class.definitions.inject([]) do |filters, definition|
+        filters << definition.build_filter(self, params[definition.request_param])
       end
+
+      @orders = self.class.order_definitions.inject([]) do |orders, definition|
+        orders << definition.build(self, params[:order])
+      end
+
     end
 
     def self.new_unwrapped(params)
@@ -179,13 +251,21 @@ module FortyFacets
     end
 
     def filter(filter_name)
-      @filters.find { |f| f.field_definition.model_field == filter_name }
+      filter = @filters.find { |f| f.field_definition.model_field == filter_name }
+      raise "unknown filter #{filter_name}" unless filter
+      filter
+    end
+
+    def order
+      @orders.find(&:active)
     end
 
     def result
-      @filters.inject(self.class.root_scope) do |previous, filter|
+      query = @filters.inject(self.class.root_scope) do |previous, filter|
         filter.build_scope.call(previous)
       end
+      query = query.order(order.definition.clause) if order
+      query
     end
 
     def wrapped_params
@@ -193,10 +273,12 @@ module FortyFacets
     end
 
     def params
-      @filters.inject({}) do |sum, filter|
+      params = @filters.inject({}) do |sum, filter|
         sum[filter.field_definition.request_param] = filter.value.dup unless filter.empty?
         sum
       end
+      params[:order] = order.definition.request_value if order
+      params
     end
 
     def path
@@ -208,3 +290,4 @@ module FortyFacets
     end
   end
 end
+
