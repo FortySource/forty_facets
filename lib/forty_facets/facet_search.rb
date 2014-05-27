@@ -61,11 +61,11 @@ module FortyFacets
       end
 
       def order_definitions
-        @order_definitions
+        @order_definitions ||= []
       end
     end
 
-    def initialize(request_params)
+    def initialize(request_params = {})
       params = if request_params && request_params[self.class.request_param_name]
                  request_params[self.class.request_param_name]
                else
