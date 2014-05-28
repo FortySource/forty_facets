@@ -66,11 +66,7 @@ module FortyFacets
     end
 
     def initialize(request_params = {})
-      params = if request_params && request_params[self.class.request_param_name]
-                 request_params[self.class.request_param_name]
-               else
-                 {}
-               end
+      params = request_to_search_params(request_params)
       @filters = self.class.definitions.inject([]) do |filters, definition|
         filters << definition.build_filter(self, params[definition.request_param])
       end
@@ -123,6 +119,17 @@ module FortyFacets
     def unfiltered?
       @filters.reject(&:empty?).empty?
     end
+
+    private
+
+    def request_to_search_params(request_params)
+      if request_params && request_params[self.class.request_param_name]
+        request_params[self.class.request_param_name]
+      else
+        {}
+      end
+    end
+
   end
 end
 
