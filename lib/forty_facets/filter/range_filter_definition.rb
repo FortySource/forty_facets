@@ -17,7 +17,7 @@ module FortyFacets
       end
 
       def absolute_interval
-        @abosultes ||= without.result.select("min(#{filter_definition.model_field}) as min, max(#{filter_definition.model_field}) as max").first
+        @abosultes ||= without.result.reorder('').select("min(#{filter_definition.model_field}) as min, max(#{filter_definition.model_field}) as max").first
       end
 
       def absolute_min
