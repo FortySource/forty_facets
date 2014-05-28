@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/fortytools/forty_facets.svg)](https://travis-ci.org/fortytools/forty_facets)
 [![Coverage Status](https://coveralls.io/repos/fortytools/forty_facets/badge.png?branch=master)](https://coveralls.io/r/fortytools/forty_facets?branch=master)
+[![Code Climate](https://codeclimate.com/github/fortytools/forty_facets.png)](https://codeclimate.com/github/fortytools/forty_facets)
 
 # FortyFacets
 
