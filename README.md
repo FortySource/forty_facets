@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/fortytools/forty_facets.svg)](https://travis-ci.org/fortytools/forty_facets)
+
 # FortyFacets
 
 FortyFacets lets you easily build explorative search interfaces based on fields of your ActiveRecord models.
