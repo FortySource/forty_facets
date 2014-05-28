@@ -3,6 +3,9 @@ require 'active_record'
 require 'logger'
 require_relative '../lib/forty_facets'
 
+require 'coveralls'
+Coveralls.wear!
+
 silence_warnings do
   ActiveRecord::Migration.verbose = false
   ActiveRecord::Base.logger = Logger.new(nil)
