@@ -35,14 +35,7 @@ module FortyFacets
           sum << FacetValue.new(facet_entity, count.occurrences, is_selected)
         end
 
-        order_accessor = filter_definition.options[:order]
-        if order_accessor
-          facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
-        else
-          facet.sort_by!{|facet_value| -facet_value.count }
-        end
-        facet
-
+        order_facet!(facet)
       end
 
       def without
@@ -66,6 +59,17 @@ module FortyFacets
         search_instance.class.new_unwrapped(new_params)
       end
 
+      private
+
+      def order_facet!(facet)
+        order_accessor = filter_definition.options[:order]
+        if order_accessor
+          facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+        else
+          facet.sort_by!{|facet_value| -facet_value.count }
+        end
+        facet
+      end
     end
 
     def build_filter(search_instance, param_value)
