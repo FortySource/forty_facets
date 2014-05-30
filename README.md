@@ -55,7 +55,7 @@ class HomeController < ApplicationController
     text :title   # filter by a generic string entered by the user
     range :price, name: 'Price' # filter by ranges for decimal fields
     facet :genre, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
-    facet :year, name: 'Releaseyear', order: :year # additionally oder values in the year field
+    facet :year, name: 'Releaseyear', order: :year # additionally order values in the year field
     facet :studio, name: 'Studio', order: :name
 
     orders 'Title' => :title,
