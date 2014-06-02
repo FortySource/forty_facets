@@ -74,6 +74,20 @@ class SmokeTest < Minitest::Test
     assert_equal Movie.count, facet.map(&:count).sum
   end
 
+  def test_year_add_remove_filter
+
+    search = MovieSearch.new()
+
+    search = search.filter(:year).add(2010)
+    assert_equal Movie.where(year: 2010).count, search.result.count
+
+    search = search.filter(:year).add(2011)
+    assert_equal Movie.where(year: [2010, 2011]).count, search.result.count
+
+    search = search.filter(:year).remove(2010)
+    assert_equal Movie.where(year: 2011).count, search.result.count
+  end
+
   def test_belongs_to_filter
     blank_search = MovieSearch.new
     first_facet_value = blank_search.filter(:studio).facet.first

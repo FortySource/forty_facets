@@ -37,10 +37,10 @@ module FortyFacets
         order_facet!(facet)
       end
 
-      def remove(value)
+      def remove(entity)
         new_params = search_instance.params || {}
         old_values = new_params[filter_definition.request_param]
-        old_values.delete(value.id.to_s)
+        old_values.delete(entity.id.to_s)
         new_params.delete(filter_definition.request_param) if old_values.empty?
         search_instance.class.new_unwrapped(new_params)
       end
