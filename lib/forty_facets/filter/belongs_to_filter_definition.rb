@@ -1,6 +1,6 @@
 module FortyFacets
   class BelongsToFilterDefinition < FilterDefinition
-    class FacetFilter < Filter
+    class BelonsToFilter < FacetFilter
       def association
         filter_definition.search.root_class.reflect_on_association(filter_definition.model_field)
       end
@@ -48,21 +48,10 @@ module FortyFacets
         search_instance.class.new_unwrapped(new_params)
       end
 
-      private
-
-      def order_facet!(facet)
-        order_accessor = filter_definition.options[:order]
-        if order_accessor
-          facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
-        else
-          facet.sort_by!{|facet_value| -facet_value.count }
-        end
-        facet
-      end
     end
 
     def build_filter(search_instance, param_value)
-      FacetFilter.new(self, search_instance, param_value)
+      BelonsToFilter.new(self, search_instance, param_value)
     end
 
   end

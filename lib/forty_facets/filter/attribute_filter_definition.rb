@@ -1,6 +1,6 @@
 module FortyFacets
   class AttributeFilterDefinition < FilterDefinition
-    class AttributeFilter < Filter
+    class AttributeFilter < FacetFilter
       def selected
         entity = search_instance.class.root_class
         column = entity.columns_hash[filter_definition.model_field.to_s]
@@ -15,10 +15,12 @@ module FortyFacets
       def facet
         my_column = filter_definition.model_field
         counts = without.result.reorder('').select("#{my_column} AS facet_value, count(#{my_column}) as occurrences").group(my_column)
-        counts.map do |c|
+        facet = counts.map do |c|
           is_selected = selected.include?(c.facet_value)
           FacetValue.new(c.facet_value, c.occurrences, is_selected)
         end
+
+        order_facet!(facet)
       end
 
       def remove(value)
