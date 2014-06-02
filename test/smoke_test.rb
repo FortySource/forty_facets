@@ -39,7 +39,7 @@ class MovieSearch < FortyFacets::FacetSearch
 
   text :title, name: 'Title'
   facet :studio, name: 'Studio'
-  facet :year
+  facet :year, order: Proc.new {|year| -year}
   range :price, name: 'Price'
 end
 
@@ -114,6 +114,12 @@ class SmokeTest < Minitest::Test
 
     assert_equal movies_with_studio.size, search_with_studio.result.size
     assert_equal movies_with_studio.size, first_facet_value.count
+  end
+
+  def test_sort_by_proc
+    blank_search = MovieSearch.new
+    facet_entities = blank_search.filter(:year).facet.map(&:entity)
+    assert_equal Movie.all.map(&:year).sort.uniq.reverse, facet_entities
   end
 
 end

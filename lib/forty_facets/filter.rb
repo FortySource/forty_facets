@@ -32,7 +32,11 @@ module FortyFacets
       def order_facet!(facet)
         order_accessor = filter_definition.options[:order]
         if order_accessor
-          facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+          if order_accessor.is_a?(Proc)
+            facet.sort_by!{|facet_value| order_accessor.call(facet_value.entity) }
+          else
+            facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+          end
         else
           facet.sort_by!{|facet_value| -facet_value.count }
         end

@@ -1,6 +1,6 @@
 module FortyFacets
   class BelongsToFilterDefinition < FilterDefinition
-    class FacetFilter < Filter
+    class BelonsToFilter < FacetFilter
       def association
         filter_definition.search.root_class.reflect_on_association(filter_definition.model_field)
       end
@@ -51,7 +51,7 @@ module FortyFacets
     end
 
     def build_filter(search_instance, param_value)
-      FacetFilter.new(self, search_instance, param_value)
+      BelonsToFilter.new(self, search_instance, param_value)
     end
 
   end
