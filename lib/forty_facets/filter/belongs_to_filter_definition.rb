@@ -1,5 +1,5 @@
 module FortyFacets
-  class BelongsToFilter < FilterDefinition
+  class BelongsToFilterDefinition < FilterDefinition
     class FacetFilter < Filter
       def association
         filter_definition.search.root_class.reflect_on_association(filter_definition.model_field)

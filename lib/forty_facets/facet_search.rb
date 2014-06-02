@@ -32,7 +32,7 @@ module FortyFacets
       end
 
       def facet(model_field, opts = {})
-        definitions << BelongsToFilter.new(self, model_field, opts)
+        definitions << BelongsToFilterDefinition.new(self, model_field, opts)
       end
 
       def facet_attr(model_field, opts = {})
