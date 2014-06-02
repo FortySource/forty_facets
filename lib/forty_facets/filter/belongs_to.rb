@@ -27,10 +27,11 @@ module FortyFacets
         my_column = association.association_foreign_key
         counts = without.result.reorder('').select("#{my_column} as foreign_id, count(#{my_column}) as occurrences").group(my_column)
         entities_by_id = klass.find(counts.map(&:foreign_id)).group_by(&:id)
-        facet = counts.inject([]) do |sum, count|
+
+        facet = counts.map do |count|
           facet_entity = entities_by_id[count.foreign_id].first
           is_selected = selected.include?(facet_entity)
-          sum << FacetValue.new(facet_entity, count.occurrences, is_selected)
+          FacetValue.new(facet_entity, count.occurrences, is_selected)
         end
 
         order_facet!(facet)
