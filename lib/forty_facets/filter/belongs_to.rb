@@ -1,7 +1,5 @@
 module FortyFacets
   class BelongsToFilter < FilterDefinition
-    FacetValue = Struct.new(:entity, :count, :selected)
-
     class FacetFilter < Filter
       def association
         filter_definition.search.root_class.reflect_on_association(filter_definition.model_field)
@@ -36,12 +34,6 @@ module FortyFacets
         end
 
         order_facet!(facet)
-      end
-
-      def without
-        new_params = search_instance.params || {}
-        new_params.delete(filter_definition.request_param)
-        search_instance.class.new_unwrapped(new_params)
       end
 
       def remove(value)

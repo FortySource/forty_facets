@@ -1,5 +1,5 @@
 module FortyFacets
-  class RangeFilterDefintion < FilterDefinition
+  class RangeFilterDefinition < FilterDefinition
     class RangeFilter < Filter
       def build_scope
         return Proc.new { |base| base } if empty?

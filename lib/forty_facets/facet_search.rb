@@ -28,11 +28,15 @@ module FortyFacets
       end
 
       def range(model_field, opts = {})
-        definitions << RangeFilterDefintion.new(self, model_field, opts)
+        definitions << RangeFilterDefinition.new(self, model_field, opts)
       end
 
       def facet(model_field, opts = {})
         definitions << BelongsToFilter.new(self, model_field, opts)
+      end
+
+      def facet_attr(model_field, opts = {})
+        definitions << AttributeFilterDefinition.new(self, model_field, opts)
       end
 
       def orders(name_and_order_options)

@@ -15,7 +15,7 @@ module FortyFacets
     def without
       search = search_instance
       return search if empty?
-      new_params = search_instance.params
+      new_params = search_instance.params || {}
       new_params.delete(filter_definition.request_param)
       search_instance.class.new_unwrapped(new_params)
     end

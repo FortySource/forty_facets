@@ -20,6 +20,7 @@ ActiveRecord::Base.connection.instance_eval do
 
   create_table :movies do |t|
     t.integer :studio_id
+    t.integer :year
     t.string :title
     t.float :price
   end
@@ -38,6 +39,7 @@ class MovieSearch < FortyFacets::FacetSearch
 
   text :title, name: 'Title'
   facet :studio, name: 'Studio'
+  facet_attr :year
   range :price, name: 'Price'
 end
 
@@ -48,7 +50,7 @@ end
 
 rand = Random.new
 %w{Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren}.each_with_index do |title, index|
-  Movie.create!(title: title, studio: studios[index % studios.length], price: rand.rand(20.0))
+  Movie.create!(title: title, studio: studios[index % studios.length], price: rand.rand(20.0), year: (index%3 + 2010) )
 end
 
 class SmokeTest < Minitest::Test
@@ -62,6 +64,14 @@ class SmokeTest < Minitest::Test
     search = MovieSearch.new({'search' => { title: 'ipsum' }})
     assert_equal 1, search.result.size
     assert_equal 'ipsum', search.result.first.title
+  end
+
+  def test_year_filter
+    search = MovieSearch.new({'search' => { year: '2011' }})
+    assert_equal [2011], search.result.map(&:year).uniq
+
+    facet = search.filter(:year).facet
+    assert_equal Movie.count, facet.map(&:count).sum
   end
 
   def test_belongs_to_filter
