@@ -7,10 +7,6 @@ module FortyFacets
       filter_definition.options[:name] || filter_definition.model_field
     end
 
-    def values
-      @values ||= Array.wrap(value).sort.uniq
-    end
-
     def empty?
       value.nil? || value == '' || value == []
     end
@@ -23,6 +19,26 @@ module FortyFacets
       new_params.delete(filter_definition.request_param)
       search_instance.class.new_unwrapped(new_params)
     end
+  end
+
+  # Base class for filter with multiple values and grouped facet values
+  class FacetFilter < Filter
+    def values
+      @values ||= Array.wrap(value).sort.uniq
+    end
+
+      protected
+
+      def order_facet!(facet)
+        order_accessor = filter_definition.options[:order]
+        if order_accessor
+          facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+        else
+          facet.sort_by!{|facet_value| -facet_value.count }
+        end
+        facet
+      end
+
   end
 end
 
