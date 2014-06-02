@@ -32,11 +32,11 @@ module FortyFacets
       end
 
       def facet(model_field, opts = {})
-        definitions << BelongsToFilterDefinition.new(self, model_field, opts)
-      end
-
-      def facet_attr(model_field, opts = {})
-        definitions << AttributeFilterDefinition.new(self, model_field, opts)
+        if self.root_scope.reflect_on_association(model_field)
+          definitions << BelongsToFilterDefinition.new(self, model_field, opts)
+        else
+          definitions << AttributeFilterDefinition.new(self, model_field, opts)
+        end
       end
 
       def orders(name_and_order_options)

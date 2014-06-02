@@ -39,7 +39,7 @@ class MovieSearch < FortyFacets::FacetSearch
 
   text :title, name: 'Title'
   facet :studio, name: 'Studio'
-  facet_attr :year
+  facet :year
   range :price, name: 'Price'
 end
 
