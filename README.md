@@ -111,13 +111,12 @@ class MySearch
 end
 ```
 
-### Available filter types
-
+### Available declaration methods
 | keyword | options       |                                                                                                                         |
 |---------|---------------|-------------------------------------------------------------------------------------------------------------------------|
 | text    | prefix:true   | creates a filter to limit search result to entities containing the filter value in the given field                      |
 | facet   |               | creates a facetted filter on the specified model attribute (attribute or belongs_to)                                    |
-| range   |               | creates a range filter (param format 'FROM - TO' limiting result to entities with values in that range                  | 
+| range   |               | creates a range filter (param format 'FROM - TO') limiting result to entities with values in that range              | 
 | orders  |               | takes a hash mapping a label to an argument that the active record `order` method can be called with to sort the result |
 
 ## FAQ
