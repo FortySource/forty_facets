@@ -88,6 +88,21 @@ class SmokeTest < Minitest::Test
     assert_equal Movie.where(year: 2011).count, search.result.count
   end
 
+  def test_selected_year_filter
+    search = MovieSearch.new()
+
+    search = search.filter(:year).add(2010)
+    assert_equal [2010], search.filter(:year).selected
+
+    search = search.filter(:year).add(2011)
+    assert_equal [2010, 2011], search.filter(:year).selected
+
+    facet = search.filter(:year).facet
+    assert facet.find{|fv| fv.entity == 2010}.selected
+    assert facet.find{|fv| fv.entity == 2011}.selected
+    assert !facet.find{|fv| fv.entity == 2012}.selected
+  end
+
   def test_belongs_to_filter
     blank_search = MovieSearch.new
     first_facet_value = blank_search.filter(:studio).facet.first

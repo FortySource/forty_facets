@@ -7,6 +7,10 @@ module FortyFacets
       filter_definition.options[:name] || filter_definition.model_field
     end
 
+    def values
+      @values ||= Array.wrap(value).sort.uniq
+    end
+
     def empty?
       value.nil? || value == '' || value == []
     end

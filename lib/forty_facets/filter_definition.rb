@@ -3,7 +3,7 @@ module FortyFacets
   FilterDefinition = Struct.new(:search, :model_field, :options) do
 
     FacetValue = Struct.new(:entity, :count, :selected)
-    
+
     def request_param
       model_field
     end

@@ -10,10 +10,6 @@ module FortyFacets
         association.klass
       end
 
-      def values
-        @values ||= Array.wrap(value).sort.uniq
-      end
-
       def selected
         @selected ||= klass.find(values)
       end
