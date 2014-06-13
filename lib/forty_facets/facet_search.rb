@@ -32,8 +32,13 @@ module FortyFacets
       end
 
       def facet(model_field, opts = {})
-        if self.root_scope.reflect_on_association(model_field)
-          definitions << BelongsToFilterDefinition.new(self, model_field, opts)
+        reflection = self.root_scope.reflect_on_association(model_field)
+        if reflection
+          if reflection.macro == :belongs_to
+            definitions << BelongsToFilterDefinition.new(self, model_field, opts)
+          else
+            definitions << HasManyFilterDefinition.new(self, model_field, opts)
+          end
         else
           definitions << AttributeFilterDefinition.new(self, model_field, opts)
         end

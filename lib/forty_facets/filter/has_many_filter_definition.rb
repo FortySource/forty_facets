@@ -1,6 +1,6 @@
 module FortyFacets
-  class BelongsToFilterDefinition < FilterDefinition
-    class BelongsToFilter < FacetFilter
+  class HasManyFilterDefinition < FilterDefinition
+    class HasManyFilter < FacetFilter
       def association
         filter_definition.search.root_class.reflect_on_association(filter_definition.model_field)
       end
@@ -16,12 +16,27 @@ module FortyFacets
 
       def build_scope
         return Proc.new { |base| base } if empty?
-        Proc.new {  |base| base.where(association.association_foreign_key => values) }
+        Proc.new do |base|
+          base_table = filter_definition.search.root_class.table_name
+          join_name =  [association.name.to_s, base_table.to_s].sort.join('_')
+          foreign_id_col = association.name.to_s.singularize + '_id'
+          # this will actually generate a subquery
+          base.where(id: base.joins(association.options[:through])
+              .where(join_name + '.' + foreign_id_col => values)
+              .group(base_table + '.id').select(base_table + '.id'))
+        end
       end
 
       def facet
-        my_column = association.association_foreign_key
-        counts = without.result.reorder('').select("#{my_column} as foreign_id, count(#{my_column}) as occurrences").group(my_column)
+        base_table = filter_definition.search.root_class.table_name
+        join_name =  [association.name.to_s, base_table.to_s].sort.join('_')
+        foreign_id_col = association.name.to_s.singularize + '_id'
+        my_column = join_name + '.' + foreign_id_col
+        counts = without.result
+                  .reorder('')
+                  .joins(association.options[:through])
+                  .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")
+                  .group(my_column)
         entities_by_id = klass.find(counts.map(&:foreign_id)).group_by(&:id)
 
         facet = counts.map do |count|
@@ -51,8 +66,9 @@ module FortyFacets
     end
 
     def build_filter(search_instance, param_value)
-      BelongsToFilter.new(self, search_instance, param_value)
+      HasManyFilter.new(self, search_instance, param_value)
     end
 
   end
 end
+
