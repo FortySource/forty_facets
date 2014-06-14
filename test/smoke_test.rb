@@ -3,7 +3,7 @@ Coveralls.wear!
 
 require "minitest/autorun"
 require 'logger'
-require 'byebug'
+#require 'byebug'# travis doenst like byebug
 require_relative '../lib/forty_facets'
 
 #silence_warnings do
