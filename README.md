@@ -42,8 +42,8 @@ If you have Movies with a textual title, categotized by genre, studio and year .
 
     class Movie < ActiveRecord::Base
       belongs_to :year
-      belongs_to :genre
       belongs_to :studio
+      has_and_belongs_to_many :genres
     end
 
 You can then declare the structure of your search like so:
@@ -55,9 +55,9 @@ class HomeController < ApplicationController
     model 'Movie' # which model to search for
     text :title   # filter by a generic string entered by the user
     range :price, name: 'Price' # filter by ranges for decimal fields
-    facet :genre, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
     facet :year, name: 'Releaseyear', order: :year # additionally order values in the year field
     facet :studio, name: 'Studio', order: :name
+    facet :genres, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
 
     orders 'Title' => :title,
            'price, cheap first' => "price asc",
@@ -121,9 +121,9 @@ end
 
 ## FAQ
 
-### Can I create filter for `has_many` associations ?
+### What kind of associations can be searched/filtered for?
 
-No. At the moment only objects directly related via a `belongs_to` can be used as filter.
+At the moment you can facet for entities mapped via a standard `belongs_to` or `has_and_belongs_to` association. 
 
 ## Contributing
 
