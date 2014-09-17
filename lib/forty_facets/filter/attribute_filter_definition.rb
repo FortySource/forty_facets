@@ -28,14 +28,14 @@ module FortyFacets
         old_values = new_params[filter_definition.request_param]
         old_values.delete(value.to_s)
         new_params.delete(filter_definition.request_param) if old_values.empty?
-        search_instance.class.new_unwrapped(new_params)
+        search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
 
       def add(value)
         new_params = search_instance.params || {}
         old_values = new_params[filter_definition.request_param] ||= []
         old_values << value.to_s
-        search_instance.class.new_unwrapped(new_params)
+        search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
     end
 

@@ -3,7 +3,8 @@ require 'active_record'
 ActiveRecord::Migration.verbose = false
 ActiveRecord::Base.logger = Logger.new(nil)
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
-ActiveRecord::Base.connection.instance_eval do
+
+ActiveRecord::Schema.define do
 
   create_table :studios do |t|
     t.string :name

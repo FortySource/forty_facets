@@ -32,7 +32,7 @@ module FortyFacets
       end
 
       def facet(model_field, opts = {})
-        reflection = self.root_scope.reflect_on_association(model_field)
+        reflection = self.root_class.reflect_on_association(model_field)
         if reflection
           if reflection.macro == :belongs_to
             definitions << BelongsToFilterDefinition.new(self, model_field, opts)
@@ -74,7 +74,7 @@ module FortyFacets
       end
     end
 
-    def initialize(request_params = {})
+    def initialize(request_params = {}, root = nil)
       params = request_to_search_params(request_params)
       @filters = self.class.definitions.inject([]) do |filters, definition|
         filters << definition.build_filter(self, params[definition.request_param])
@@ -84,10 +84,11 @@ module FortyFacets
         orders << definition.build(self, params[:order])
       end
 
+      @root = root
     end
 
-    def self.new_unwrapped(params)
-      self.new(request_param_name => params)
+    def self.new_unwrapped(params, root)
+      self.new({request_param_name => params}, root)
     end
 
     def filter(filter_name)
@@ -101,7 +102,7 @@ module FortyFacets
     end
 
     def result
-      query = @filters.inject(self.class.root_scope) do |previous, filter|
+      query = @filters.inject(root) do |previous, filter|
         filter.build_scope.call(previous)
       end
       query = query.order(order.definition.clause) if order
@@ -127,6 +128,10 @@ module FortyFacets
 
     def unfiltered?
       @filters.reject(&:empty?).empty?
+    end
+
+    def root
+      @root || self.class.root_scope
     end
 
     private

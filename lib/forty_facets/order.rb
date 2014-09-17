@@ -9,7 +9,7 @@ module FortyFacets
     def by
       new_params = search.params || {}
       new_params[:order] = definition.request_value
-      search.class.new_unwrapped(new_params)
+      search.class.new_unwrapped(new_params, search.root)
     end
   end
 end
