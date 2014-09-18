@@ -38,7 +38,7 @@ Or install it yourself as:
 
 You can clone a working example at https://github.com/fortytools/forty_facets_demo
 
-If you have Movies with a textual title, categotized by genre, studio and year ..
+If you have Movies with a textual title, categotized by genre, studio and year with studios belonging to a country...
 
     class Movie < ActiveRecord::Base
       belongs_to :year
@@ -58,6 +58,7 @@ class HomeController < ApplicationController
     facet :year, name: 'Releaseyear', order: :year # additionally order values in the year field
     facet :studio, name: 'Studio', order: :name
     facet :genres, name: 'Genre' # generate a filter with all values of 'genre' occuring in the result
+    facet [:studio, :country], name: 'Country' # generate a filter several belongs_to 'hops' away
 
     orders 'Title' => :title,
            'price, cheap first' => "price asc",

@@ -5,8 +5,12 @@ ActiveRecord::Base.logger = Logger.new(nil)
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
 ActiveRecord::Schema.define do
+  create_table :countries do |t|
+    t.string :name
+  end
 
   create_table :studios do |t|
+    t.integer :country_id
     t.string :name
   end
 
@@ -55,7 +59,11 @@ end
 class Genre < ActiveRecord::Base
 end
 
+class Country < ActiveRecord::Base
+end
+
 class Studio < ActiveRecord::Base
+  belongs_to :country
 end
 
 class Movie < ActiveRecord::Base
@@ -65,9 +73,14 @@ class Movie < ActiveRecord::Base
   has_and_belongs_to_many :writers
 end
 
+countries = []
+%w{US UK}.each do |code|
+  countries << Country.create!(name: code)
+end
+
 studios = []
-%w{A B C D}.each do |suffix|
-  studios << Studio.create!(name: "Studio #{suffix}")
+%w{A B C D}.each_with_index do |suffix, index|
+  studios << Studio.create!(name: "Studio #{suffix}", country: countries[index % countries.length])
 end
 
 genres = []

@@ -20,6 +20,7 @@ class MovieSearch < FortyFacets::FacetSearch
   facet :actors, name: 'Actor'
   range :price, name: 'Price'
   facet :writers, name: 'Writer'
+  facet [:studio, :country], name: 'Country'
 end
 
 class SmokeTest < Minitest::Test
@@ -41,6 +42,24 @@ class SmokeTest < Minitest::Test
 
     facet = search.filter(:year).facet
     assert_equal Movie.count, facet.map(&:count).sum
+  end
+
+  def test_country_filter
+    search = MovieSearch.new('search' => { 'studio-country' => Country.first.id.to_s})
+    assert_equal [Country.first], search.result.map{|m| m.studio.country}.uniq
+    assert_equal Movie.count / 2, search.result.count
+
+    search = MovieSearch.new('search' => { 'studio-country' => Country.last.id.to_s})
+    assert_equal [Country.last], search.result.map{|m| m.studio.country}.uniq
+    assert_equal Movie.count / 2, search.result.count
+  end
+
+  def test_selected_country_filter
+    search = MovieSearch.new('search' => { 'studio-country' => Country.first.id.to_s})
+    filter = search.filter([:studio, :country])
+    assert_equal [Country.first], filter.selected
+
+    assert_equal Movie.count / 2, filter.facet.reject(&:selected).first.count
   end
 
   def test_year_add_remove_filter

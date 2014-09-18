@@ -32,15 +32,19 @@ module FortyFacets
       end
 
       def facet(model_field, opts = {})
-        reflection = self.root_class.reflect_on_association(model_field)
-        if reflection
-          if reflection.macro == :belongs_to
-            definitions << BelongsToFilterDefinition.new(self, model_field, opts)
-          else
-            definitions << HasManyFilterDefinition.new(self, model_field, opts)
-          end
+        if model_field.is_a? Array
+          definitions << BelongsToChainFilterDefinition.new(self, model_field, opts)
         else
-          definitions << AttributeFilterDefinition.new(self, model_field, opts)
+          reflection = self.root_class.reflect_on_association(model_field)
+          if reflection
+            if reflection.macro == :belongs_to
+              definitions << BelongsToFilterDefinition.new(self, model_field, opts)
+            else
+              definitions << HasManyFilterDefinition.new(self, model_field, opts)
+            end
+          else
+            definitions << AttributeFilterDefinition.new(self, model_field, opts)
+          end
         end
       end
 
@@ -93,7 +97,7 @@ module FortyFacets
 
     def filter(filter_name)
       filter = @filters.find { |f| f.filter_definition.model_field == filter_name }
-      raise "unknown filter #{filter_name}" unless filter
+      raise "Unknown filter #{filter_name}" unless filter
       filter
     end
 
