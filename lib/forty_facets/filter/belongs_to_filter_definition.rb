@@ -20,7 +20,7 @@ module FortyFacets
       end
 
       def facet
-        my_column = association.association_foreign_key
+        my_column = "#{filter_definition.search.root_class.table_name}.#{association.association_foreign_key}"
         counts = without.result.reorder('').select("#{my_column} as foreign_id, count(#{my_column}) as occurrences").group(my_column)
         entities_by_id = klass.find(counts.map(&:foreign_id)).group_by(&:id)
 

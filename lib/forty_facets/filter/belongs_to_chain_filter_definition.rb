@@ -37,7 +37,14 @@ module FortyFacets
       end
 
       def facet
-        my_column = association.association_foreign_key
+        current_association = nil
+        current_class = filter_definition.search.root_class
+        filter_definition.model_field.reverse.drop(1).reverse.each do |field|
+          current_association = current_class.reflect_on_association(field)
+          current_class = current_association.klass
+        end
+
+        my_column = "#{current_class.table_name}.#{association.association_foreign_key}"
         counts = without.result.reorder('').joins(joins).select("#{my_column} AS foreign_id, count(#{my_column}) AS occurrences").group(my_column)
         entities_by_id = klass.find(counts.map(&:foreign_id)).group_by(&:id)
 
