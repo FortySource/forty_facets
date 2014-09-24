@@ -19,33 +19,24 @@ module FortyFacets
     attr_reader :filters, :orders
 
     class << self
-      def model(model_name)
-        @model_name = model_name
-      end
-
-      def text(model_field, opts = {})
-        definitions << TextFilterDefinition.new(self, model_field, opts)
-      end
-
-      def range(model_field, opts = {})
-        definitions << RangeFilterDefinition.new(self, model_field, opts)
-      end
-
-      def facet(model_field, opts = {})
-        if model_field.is_a? Array
-          definitions << BelongsToChainFilterDefinition.new(self, model_field, opts)
+      def model(model)
+        if model.is_a? Class
+          @root_class = model
         else
-          reflection = self.root_class.reflect_on_association(model_field)
-          if reflection
-            if reflection.macro == :belongs_to
-              definitions << BelongsToFilterDefinition.new(self, model_field, opts)
-            else
-              definitions << HasManyFilterDefinition.new(self, model_field, opts)
-            end
-          else
-            definitions << AttributeFilterDefinition.new(self, model_field, opts)
-          end
+          @root_class = Kernel.const_get(model)
         end
+      end
+
+      def text(path, opts = {})
+        definitions << TextFilterDefinition.new(self, path, opts)
+      end
+
+      def range(path, opts = {})
+        definitions << RangeFilterDefinition.new(self, path, opts)
+      end
+
+      def facet(path, opts = {})
+        definitions << FacetFilterDefinition.new(self, path, opts)
       end
 
       def orders(name_and_order_options)
@@ -57,8 +48,7 @@ module FortyFacets
       end
 
       def root_class
-        raise 'No model given' unless @model_name
-        Kernel.const_get(@model_name)
+        @root_class || raise('No model class given')
       end
 
       def root_scope
@@ -96,7 +86,7 @@ module FortyFacets
     end
 
     def filter(filter_name)
-      filter = @filters.find { |f| f.filter_definition.model_field == filter_name }
+      filter = @filters.find { |f| f.definition.path == [filter_name].flatten }
       raise "Unknown filter #{filter_name}" unless filter
       filter
     end
@@ -119,7 +109,7 @@ module FortyFacets
 
     def params
       params = @filters.inject({}) do |sum, filter|
-        sum[filter.filter_definition.request_param] = filter.value.dup unless filter.empty?
+        sum[filter.definition.request_param] = filter.value.dup unless filter.empty?
         sum
       end
       params[:order] = order.definition.request_value if order

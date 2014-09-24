@@ -21,6 +21,9 @@ class MovieSearch < FortyFacets::FacetSearch
   range :price, name: 'Price'
   facet :writers, name: 'Writer'
   facet [:studio, :country], name: 'Country'
+  facet [:studio, :status], name: 'Studio status'
+  facet [:studio, :producers], name: 'Producers'
+  text [:studio, :description], name: 'Studio Description'
 end
 
 class SmokeTest < Minitest::Test
@@ -31,17 +34,33 @@ class SmokeTest < Minitest::Test
   end
 
   def test_text_filter
-    search = MovieSearch.new({'search' => { title: 'ipsum' }})
+    search = MovieSearch.new({'search' => { 'title' => 'ipsum' }})
     assert_equal 1, search.result.size
     assert_equal 'ipsum', search.result.first.title
   end
 
   def test_year_filter
-    search = MovieSearch.new({'search' => { year: '2011' }})
+    search = MovieSearch.new({'search' => { 'year' => '2011' }})
     assert_equal [2011], search.result.map(&:year).uniq
 
     facet = search.filter(:year).facet
     assert_equal Movie.count, facet.map(&:count).sum
+  end
+
+  def test_range_filter
+    search = MovieSearch.new({'search' => {'price' => '0 - 20'}})
+    assert_equal Movie.count, search.result.size
+
+    search = MovieSearch.new({'search' => {'price' => '0 - 10'}})
+    assert_equal Movie.all.reject{|m| m.price > 10}.size, search.result.size
+  end
+
+  def test_text_filter_via_belongs_to
+    description = Studio.first.description
+    search = MovieSearch.new({'search' => { 'studio-description' => description }})
+
+    assert_equal Movie.all.reject{|m| m.studio.description != description}.size, search.result.size
+    assert_equal description, search.result.first.studio.description
   end
 
   def test_country_filter
@@ -57,9 +76,19 @@ class SmokeTest < Minitest::Test
   def test_selected_country_filter
     search = MovieSearch.new('search' => { 'studio-country' => Country.first.id.to_s})
     filter = search.filter([:studio, :country])
+    assert_equal FortyFacets::FacetFilterDefinition::BelongsToFilter, filter.class
     assert_equal [Country.first], filter.selected
 
     assert_equal Movie.count / 2, filter.facet.reject(&:selected).first.count
+  end
+
+  def test_studio_status_filter
+    search = MovieSearch.new('search' => { 'studio-status' => 'active'})
+    assert_equal ['active'], search.result.map{|m| m.studio.status}.uniq
+    assert_equal Movie.count / 2, search.result.count
+
+    filter = search.filter([:studio, :status])
+    assert_equal ['active'], filter.selected
   end
 
   def test_year_add_remove_filter
@@ -114,8 +143,19 @@ class SmokeTest < Minitest::Test
     blank_search = MovieSearch.new
     genre = Genre.first
     expected = Movie.order(:id).select{|m| m.genres.include?(genre)}
-    assert blank_search.filter(:genres).is_a?(FortyFacets::HasManyFilterDefinition::HasManyFilter)
+    assert blank_search.filter(:genres).is_a?(FortyFacets::FacetFilterDefinition::HasManyFilter)
     search = blank_search.filter(:genres).add(genre)
+    actual = search.result
+
+    assert_equal expected.size, actual.size
+  end
+
+  def test_hast_many_via_belongs_to
+    blank_search = MovieSearch.new
+    producer = Producer.first
+    expected = Movie.order(:id).select{|m| m.studio.producers.include? producer}
+    assert blank_search.filter([:studio, :producers]).is_a?(FortyFacets::FacetFilterDefinition::HasManyFilter)
+    search = blank_search.filter([:studio, :producers]).add(producer)
     actual = search.result
 
     assert_equal expected.size, actual.size
@@ -125,7 +165,7 @@ class SmokeTest < Minitest::Test
     blank_search = MovieSearch.new
     writer = Writer.first
     expected = Movie.order(:id).select{|m| m.writers.include?(writer)}
-    assert blank_search.filter(:writers).is_a?(FortyFacets::HasManyFilterDefinition::HasManyFilter)
+    assert blank_search.filter(:writers).is_a?(FortyFacets::FacetFilterDefinition::HasManyFilter)
     search = blank_search.filter(:writers).add(writer)
     actual = search.result
 
@@ -139,7 +179,7 @@ class SmokeTest < Minitest::Test
     expected = Movie.order(:id)
                 .select{|m| m.genres.include?(genre)}
                 .select{|m| m.actors.include?(actor)}
-    assert blank_search.filter(:genres).is_a?(FortyFacets::HasManyFilterDefinition::HasManyFilter)
+    assert blank_search.filter(:genres).is_a?(FortyFacets::FacetFilterDefinition::HasManyFilter)
     search_with_genre = blank_search.filter(:genres).add(genre)
     search_with_genre_and_actor = search_with_genre.filter(:actors).add(actor)
     actual = search_with_genre_and_actor.result
