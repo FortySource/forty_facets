@@ -11,6 +11,12 @@ ActiveRecord::Schema.define do
 
   create_table :studios do |t|
     t.integer :country_id
+    t.string :status
+    t.string :name
+    t.string :description
+  end
+
+  create_table :producers do |t|
     t.string :name
   end
 
@@ -48,6 +54,14 @@ ActiveRecord::Schema.define do
     t.integer :genre_id
   end
 
+  create_table :producers_studios do |t|
+    t.integer :producer_id
+    t.integer :studio_id
+  end
+
+end
+
+class Producer < ActiveRecord::Base
 end
 
 class Actor < ActiveRecord::Base
@@ -64,6 +78,7 @@ end
 
 class Studio < ActiveRecord::Base
   belongs_to :country
+  has_and_belongs_to_many :producers
 end
 
 class Movie < ActiveRecord::Base
@@ -73,14 +88,32 @@ class Movie < ActiveRecord::Base
   has_and_belongs_to_many :writers
 end
 
+LOREM = %w{Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren}
+
 countries = []
 %w{US UK}.each do |code|
   countries << Country.create!(name: code)
 end
 
+producers = []
+%w(Smith Logan Kelly Anderson Hendricks Bush).each do |name|
+  producers << Producer.create!(name: name)
+end
+
+
 studios = []
 %w{A B C D}.each_with_index do |suffix, index|
-  studios << Studio.create!(name: "Studio #{suffix}", country: countries[index % countries.length])
+  studio = Studio.create!(name: "Studio #{suffix}", status: %w(active inactive)[index % 2],
+    country: countries[index % countries.length], description: LOREM.shuffle.take(5).join(' '))
+
+  3.times do
+    producer = producers[rand(producers.length)]
+    unless studio.producers.include? producer
+      studio.producers << producer
+    end
+  end
+
+  studios << studio
 end
 
 genres = []
@@ -99,7 +132,7 @@ writers = []
 end
 
 rand = Random.new
-%w{Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren}.each_with_index do |title, index|
+LOREM.each_with_index do |title, index|
   m = Movie.create!(title: title, studio: studios[index % studios.length], price: rand.rand(20.0), year: (index%3 + 2010) )
   3.times do
     actor = actors[rand(actors.length)]
