@@ -100,7 +100,7 @@ module FortyFacets
         filter.build_scope.call(previous)
       end
       query = query.order(order.definition.clause) if order
-      query
+      query.uniq
     end
 
     def wrapped_params
