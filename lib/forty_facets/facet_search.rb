@@ -12,7 +12,8 @@ module FortyFacets
   #
   #     orders 'Title' => :title,
   #            'price, cheap first' => "price asc",
-  #            'price, expensive first' => {price: :desc, title: :desc}
+  #            'price, expensive first' => {price: :desc, title: :desc},
+  #            'Title, reverse' => {order: "title desc", default: true}
   #
   #   end
   class FacetSearch
@@ -78,6 +79,11 @@ module FortyFacets
         orders << definition.build(self, params[:order])
       end
 
+      unless @orders.find(&:active)
+        default_order = @orders.find {|o| o.definition.default}
+        default_order.active = true if default_order
+      end
+
       @root = root
     end
 
@@ -100,7 +106,7 @@ module FortyFacets
         filter.build_scope.call(previous)
       end
       query = query.order(order.definition.clause) if order
-      query.uniq
+      query
     end
 
     def wrapped_params
@@ -117,7 +123,7 @@ module FortyFacets
     end
 
     def path
-      unfiltered? ? '?' : '?' + wrapped_params.to_param
+      '?' + wrapped_params.to_param
     end
 
     def unfiltered?

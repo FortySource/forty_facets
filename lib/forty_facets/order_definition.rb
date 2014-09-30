@@ -1,6 +1,21 @@
 module FortyFacets
   # Stores the parameters of a order criteria for a search.
-  OrderDefinition = Struct.new(:title, :clause) do
+  class OrderDefinition
+    attr(:title, :clause, :default)
+
+    def initialize title, clause
+      @title = title
+      @clause = clause
+      @default = false
+
+      if clause.is_a? Hash
+        if clause[:order] && clause[:default]
+          @clause = clause[:order]
+          @default = clause[:default]
+        end
+      end
+    end
+
     def build(search, order_param)
       Order.new(search, self, order_param == title.to_s)
     end

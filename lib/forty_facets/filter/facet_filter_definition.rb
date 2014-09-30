@@ -54,7 +54,14 @@ module FortyFacets
 
       def build_scope
         return Proc.new { |base| base } if empty?
-        Proc.new {  |base| base.joins(definition.joins).where(definition.qualified_column_name => value) }
+        Proc.new do |base|
+          result = base.joins(definition.joins).where(definition.qualified_column_name => value)
+          if definition.joins
+            result = result.distinct
+          end
+
+          result
+        end
       end
 
       def facet
@@ -89,7 +96,14 @@ module FortyFacets
     class BelongsToFilter < AssociationFacetFilter
       def build_scope
         return Proc.new { |base| base } if empty?
-        Proc.new {  |base| base.joins(definition.joins).where(definition.qualified_column_name => values) }
+        Proc.new do |base|
+          result = base.joins(definition.joins).where(definition.qualified_column_name => values)
+          if definition.joins
+            result = result.distinct
+          end
+
+          result
+        end
       end
 
       def facet
@@ -120,7 +134,7 @@ module FortyFacets
           subquery = base.joins(definition.joins).select(primary_key_column)
             .where("#{join_name}.#{definition.association.foreign_key}" => values).uniq
 
-          base.joins(definition.joins).where(primary_key_column => subquery.select(primary_key_column)).uniq
+          base.joins(definition.joins).where(primary_key_column => subquery.select(primary_key_column)).distinct
         end
       end
 
