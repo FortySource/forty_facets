@@ -134,6 +134,10 @@ module FortyFacets
       @root || self.class.root_scope
     end
 
+    def change_root new_root
+      @root = new_root
+    end
+
     private
 
     def request_to_search_params(request_params)
