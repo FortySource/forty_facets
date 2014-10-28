@@ -1,12 +1,13 @@
 [![Build Status](https://travis-ci.org/fortytools/forty_facets.svg)](https://travis-ci.org/fortytools/forty_facets)
 [![Coverage Status](https://coveralls.io/repos/fortytools/forty_facets/badge.png?branch=master)](https://coveralls.io/r/fortytools/forty_facets?branch=master)
 [![Code Climate](https://codeclimate.com/github/fortytools/forty_facets.png)](https://codeclimate.com/github/fortytools/forty_facets)
+[![forty_facets API Documentation](https://www.omniref.com/ruby/gems/forty_facets.png)](https://www.omniref.com/ruby/gems/forty_facets)
 
 # FortyFacets
 
 FortyFacets lets you easily build explorative search interfaces based on fields of your ActiveRecord models.
 
-![demo](demo.gif)
+![demo](https://raw.githubusercontent.com/fortytools/forty_facets/master/demo.gif)
 
 See it implemented in a [example rails application](https://github.com/fortytools/forty_facets_demo) or
 try a [working demo](http://forty-facets-demo.herokuapp.com/ "Testinstallation on heroku")!
