@@ -213,4 +213,10 @@ class SmokeTest < Minitest::Test
 
   end
 
+  def test_includes_does_not_blow_up
+    selected_genre = Genre.first
+    search = MovieSearch.new({}, Movie.all.includes(:studio)).filter(:genres).add(selected_genre)
+    search.filter(:studio).facet.reject(&:selected).to_a
+  end
+
 end

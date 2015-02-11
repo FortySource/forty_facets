@@ -68,6 +68,7 @@ module FortyFacets
         my_column = definition.qualified_column_name
         query = "#{my_column} AS facet_value, count(#{my_column}) AS occurrences"
         counts = without.result.reorder('').joins(definition.joins).select(query).group(my_column)
+        counts.includes_values = []
         facet = counts.map do |c|
           is_selected = selected.include?(c.facet_value)
           FacetValue.new(c.facet_value, c.occurrences, is_selected)
@@ -110,6 +111,7 @@ module FortyFacets
         my_column = definition.qualified_column_name
         query = "#{my_column} AS foreign_id, count(#{my_column}) AS occurrences"
         counts = without.result.reorder('').joins(definition.joins).select(query).group(my_column)
+        counts.includes_values = []
         entities_by_id = definition.association.klass.find(counts.map(&:foreign_id)).group_by(&:id)
 
         facet = counts.map do |count|
@@ -148,6 +150,7 @@ module FortyFacets
                   .joins(definition.joins)
                   .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")
                   .group(my_column)
+        counts.includes_values = []
         entities_by_id = definition.association.klass.find(counts.map(&:foreign_id)).group_by(&:id)
 
         facet = counts.map do |count|
