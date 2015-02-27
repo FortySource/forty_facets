@@ -49,7 +49,7 @@ module FortyFacets
       def selected
         entity = definition.origin_class
         column = entity.columns_hash[definition.attribute.to_s]
-        values.map{|v| column.type_cast(v)}
+        values.map{|v| entity.connection.type_cast(v, column)}
       end
 
       def build_scope
@@ -168,6 +168,8 @@ module FortyFacets
         if association.macro == :belongs_to
           BelongsToFilter.new(self, search_instance, param_value)
         elsif association.macro == :has_many
+          HasManyFilter.new(self, search_instance, param_value)
+        elsif association.macro == :has_and_belongs_to_many
           HasManyFilter.new(self, search_instance, param_value)
         else
           raise "Unsupported association type: #{association.macro}"
