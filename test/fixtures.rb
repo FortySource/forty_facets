@@ -86,6 +86,9 @@ class Movie < ActiveRecord::Base
   has_and_belongs_to_many :genres
   has_and_belongs_to_many :actors
   has_and_belongs_to_many :writers
+
+  scope :classics, -> { where("year <= ?", 1980) }
+  scope :non_classics, -> { where("year > ?", 1980) }
 end
 
 LOREM = %w{Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren}
@@ -133,7 +136,8 @@ end
 
 rand = Random.new
 LOREM.each_with_index do |title, index|
-  m = Movie.create!(title: title, studio: studios[index % studios.length], price: rand.rand(20.0), year: (index%3 + 2010) )
+  m = Movie.create!(title: title, studio: studios[index % studios.length],
+                    price: rand.rand(20.0), year: (index + 1975))
   3.times do
     actor = actors[rand(actors.length)]
     unless m.actors.include? actor
