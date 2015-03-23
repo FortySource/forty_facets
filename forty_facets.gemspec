@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "coveralls"
   spec.add_development_dependency "activerecord", "= 4.1.0"
-  spec.add_development_dependency "byebug" # travis doenst like byebug
+  #spec.add_development_dependency "byebug" # travis doenst like byebug
 end
