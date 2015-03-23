@@ -23,6 +23,10 @@ class MovieSearch < FortyFacets::FacetSearch
   facet [:studio, :country], name: 'Country'
   facet [:studio, :status], name: 'Studio status'
   facet [:studio, :producers], name: 'Producers'
+  sql_facet({ classic: "year <= 1980", non_classic: "year > 1980" },
+            { name: "Classic", path: :classic })
+  sql_facet({ classic: "year <= 1980", non_classic: "year > 1980" },
+            { name: "Classic" })
   text [:studio, :description], name: 'Studio Description'
 end
 
@@ -31,6 +35,50 @@ class SmokeTest < Minitest::Test
   def test_it_finds_all_movies
     search = MovieSearch.new({})
     assert_equal Movie.all.size, search.result.size
+  end
+
+  def test_scope_filter
+    search = MovieSearch.new("search" => {})
+    assert_equal 40, search.result.size
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:classic, 6, false)
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, false)
+
+    search = MovieSearch.new("search" => { "classic" => "classic" })
+    assert_equal 6, search.result.size
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:classic, 6, true)
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, false)
+
+    search = MovieSearch.new("search" => { "classic" => "non_classic" })
+    assert_equal 34, search.result.size
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:classic, 6, false)
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, true)
+
+    search = MovieSearch.new("search" => { "classic" => ["non_classic", "classic"] })
+    assert_equal 40, search.result.size
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:classic, 6, true)
+    assert search.filter(:classic).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, true)
+  end
+
+  def test_scope_filter_without_path
+    search = MovieSearch.new("search" => {})
+    assert_equal 40, search.result.size
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:classic, 6, false)
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, false)
+
+    search = MovieSearch.new("search" => { "classic-non_classic" => "classic" })
+    assert_equal 6, search.result.size
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:classic, 6, true)
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, false)
+
+    search = MovieSearch.new("search" => { "classic-non_classic" => "non_classic" })
+    assert_equal 34, search.result.size
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:classic, 6, false)
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, true)
+
+    search = MovieSearch.new("search" => { "classic-non_classic" => ["non_classic", "classic"] })
+    assert_equal 40, search.result.size
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:classic, 6, true)
+    assert search.filter([:classic, :non_classic]).facet.include? FortyFacets::FacetValue.new(:non_classic, 34, true)
   end
 
   def test_text_filter

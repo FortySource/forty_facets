@@ -40,6 +40,10 @@ module FortyFacets
         definitions << FacetFilterDefinition.new(self, path, opts)
       end
 
+      def sql_facet(queries, opts = {})
+        definitions << SqlFacetFilterDefinition.new(self, queries, opts)
+      end
+
       def orders(name_and_order_options)
         @order_definitions = name_and_order_options.to_a.inject([]) {|ods, no| ods << OrderDefinition.new(no.first, no.last)}
       end
