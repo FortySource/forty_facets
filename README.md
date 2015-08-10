@@ -45,6 +45,8 @@ If you have Movies with a textual title, categotized by genre, studio and year w
       belongs_to :year
       belongs_to :studio
       has_and_belongs_to_many :genres
+
+      scope :classics, -> { where("year <= ?", 1980) }
     end
 
 You can then declare the structure of your search like so:
@@ -55,6 +57,7 @@ class HomeController < ApplicationController
   class MovieSearch < FortyFacets::FacetSearch
     model 'Movie' # which model to search for
     text :title   # filter by a generic string entered by the user
+    scope :classics   # only return movies which are in the scope 'classics'
     range :price, name: 'Price' # filter by ranges for decimal fields
     facet :year, name: 'Releaseyear', order: :year # additionally order values in the year field
     facet :studio, name: 'Studio', order: :name
@@ -117,6 +120,7 @@ end
 | keyword | options       |                                                                                                                         |
 |---------|---------------|-------------------------------------------------------------------------------------------------------------------------|
 | text    | prefix:true   | creates a filter to limit search result to entities containing the filter value in the given field                      |
+| scope   |               | creates a filter to limit search result to entities matching the scope with the given name                              |
 | facet   |               | creates a facetted filter on the specified model attribute (attribute or belongs_to)                                    |
 | range   |               | creates a range filter (param format 'FROM - TO') limiting result to entities with values in that range              | 
 | orders  |               | takes a hash mapping a label to an argument that the active record `order` method can be called with to sort the result |

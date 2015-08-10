@@ -5,6 +5,7 @@ module FortyFacets
   #     model 'Movie'
   #
   #     text :title
+  #     scope :someScope, name: 'Only very special'
   #     range :price
   #     facet :genre, name: 'Genre'
   #     facet :year, name: 'Releaseyear', order: :year
@@ -30,6 +31,10 @@ module FortyFacets
 
       def text(path, opts = {})
         definitions << TextFilterDefinition.new(self, path, opts)
+      end
+
+      def scope(path, opts = {})
+        definitions << ScopeFilterDefinition.new(self, path, opts)
       end
 
       def range(path, opts = {})

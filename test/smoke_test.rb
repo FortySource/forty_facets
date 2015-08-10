@@ -28,6 +28,7 @@ class MovieSearch < FortyFacets::FacetSearch
   sql_facet({ classic: "year <= 1980", non_classic: "year > 1980" },
             { name: "Classic" })
   text [:studio, :description], name: 'Studio Description'
+  scope :classics, 'Name classics'
 end
 
 class SmokeTest < Minitest::Test
@@ -265,6 +266,11 @@ class SmokeTest < Minitest::Test
     selected_genre = Genre.first
     search = MovieSearch.new({}, Movie.all.includes(:studio)).filter(:genres).add(selected_genre)
     search.filter(:studio).facet.reject(&:selected).to_a
+  end
+
+  def test_scope_filter
+    search_with_scope = MovieSearch.new().filter(:classics).add
+    assert search_with_scope.result.count < Movie.count, 'Activating the scope should yield a smaller set of movies'
   end
 
 end
