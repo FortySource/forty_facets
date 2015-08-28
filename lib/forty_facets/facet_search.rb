@@ -15,6 +15,7 @@ module FortyFacets
   #            'price, cheap first' => "price asc",
   #            'price, expensive first' => {price: :desc, title: :desc},
   #            'Title, reverse' => {order: "title desc", default: true}
+  #     custom :for_manual_handling
   #
   #   end
   class FacetSearch
@@ -31,6 +32,10 @@ module FortyFacets
 
       def text(path, opts = {})
         definitions << TextFilterDefinition.new(self, path, opts)
+      end
+
+      def custom(path, opts = {})
+        definitions << CustomFilterDefinition.new(self, path, opts)
       end
 
       def scope(path, opts = {})

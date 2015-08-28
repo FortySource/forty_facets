@@ -67,6 +67,8 @@ class HomeController < ApplicationController
     orders 'Title' => :title,
            'price, cheap first' => "price asc",
            'price, expensive first' => {price: :desc, title: :desc}
+    custom :for_manual_handling
+
   end
 
   def index
@@ -124,6 +126,7 @@ end
 | facet   |               | creates a facetted filter on the specified model attribute (attribute or belongs_to)                                    |
 | range   |               | creates a range filter (param format 'FROM - TO') limiting result to entities with values in that range              | 
 | orders  |               | takes a hash mapping a label to an argument that the active record `order` method can be called with to sort the result |
+| custom  |               | doesnt affect the query directly, just handles the request param. access via @search.filter(:custom_filter).set(..) /@search.filter(:custom_filter).value |
 
 ## FAQ
 

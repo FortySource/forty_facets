@@ -29,6 +29,7 @@ class MovieSearch < FortyFacets::FacetSearch
             { name: "Classic" })
   text [:studio, :description], name: 'Studio Description'
   scope :classics, 'Name classics'
+  custom :needs_complex_filtering
 end
 
 class SmokeTest < Minitest::Test
@@ -271,6 +272,13 @@ class SmokeTest < Minitest::Test
   def test_scope_filter
     search_with_scope = MovieSearch.new().filter(:classics).add
     assert search_with_scope.result.count < Movie.count, 'Activating the scope should yield a smaller set of movies'
+  end
+
+  def test_custom_filter
+    search = MovieSearch.new
+    new_search = search.filter(:needs_complex_filtering).set('foo')
+
+    assert_equal 'foo', new_search.filter(:needs_complex_filtering).value
   end
 
 end
