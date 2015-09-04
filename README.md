@@ -101,7 +101,7 @@ Use the search object to display further narrowing options to the user
           %li= link_to genre.name, filter.remove(genre).path
       %ul.selectable
         - filter.facet.reject(&:selected).each do |facet_value|
-          - genre = facet_value.genre
+          - genre = facet_value.entity
           %li
             = link_to genre.name, filter.add(genre).path
             %span.count= "(#{facet_value.count})"
