@@ -124,6 +124,7 @@ module FortyFacets
     end
 
     def wrapped_params
+      return {} if params.empty?
       { self.class.request_param_name => params }
     end
 
@@ -137,6 +138,7 @@ module FortyFacets
     end
 
     def path
+      return nil if wrapped_params.empty?
       '?' + wrapped_params.to_param
     end
 
@@ -156,7 +158,12 @@ module FortyFacets
 
     def request_to_search_params(request_params)
       if request_params && request_params[self.class.request_param_name]
-        request_params[self.class.request_param_name]
+        should_be_hash = request_params[self.class.request_param_name]
+        if should_be_hash.is_a? Hash
+          should_be_hash
+        else
+          {}
+        end
       else
         {}
       end
