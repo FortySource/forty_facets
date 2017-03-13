@@ -159,6 +159,9 @@ module FortyFacets
     def request_to_search_params(request_params)
       if request_params && request_params[self.class.request_param_name]
         should_be_hash = request_params[self.class.request_param_name]
+        if should_be_hash.respond_to?(:permit!)
+          should_be_hash = should_be_hash.permit!.to_h
+        end
         if should_be_hash.is_a? Hash
           should_be_hash
         else
