@@ -1,3 +1,5 @@
+require 'byebug'
+
 module FortyFacets
   class FacetFilterDefinition < FilterDefinition
 
@@ -129,14 +131,12 @@ module FortyFacets
         return Proc.new { |base| base } if empty?
         Proc.new do |base|
           base_table = definition.origin_class.table_name
-          join_name =  [definition.association.name.to_s, base_table.to_s].sort.join('_')
 
           primary_key_column = "#{base_table}.#{definition.origin_class.primary_key}"
 
-          subquery = base.joins(definition.joins).select(primary_key_column)
-            .where("#{join_name}.#{definition.association.foreign_key}" => values).uniq
+          matches_from_facet = base.joins(definition.joins).where("#{definition.association.klass.table_name}.#{definition.association.klass.primary_key}" => values).select(primary_key_column)
 
-          base.joins(definition.joins).where(primary_key_column => subquery.select(primary_key_column)).distinct
+          base.joins(definition.joins).where(primary_key_column => matches_from_facet).distinct
         end
       end
 
