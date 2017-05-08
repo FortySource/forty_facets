@@ -120,8 +120,10 @@ module FortyFacets
         filter.build_scope.call(previous)
       end
 
-      unless skip_ordering
-        query = query.order(order.definition.clause) if order
+      if order && !skip_ordering
+        query = order.apply(query)
+      else
+        query = query.distinct
       end
       query
     end
