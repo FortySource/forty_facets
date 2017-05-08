@@ -27,7 +27,7 @@ module FortyFacets
 
     class AssociationFacetFilter < FacetFilter
       def selected
-        @selected ||= definition.association.klass.find(values)
+        @selected ||= definition.association.klass.find(Array.wrap(values).reject(&:blank?))
       end
 
       def remove(entity)
@@ -57,19 +57,14 @@ module FortyFacets
       def build_scope
         return Proc.new { |base| base } if empty?
         Proc.new do |base|
-          result = base.joins(definition.joins).where(definition.qualified_column_name => value)
-          if definition.joins
-            result = result.distinct
-          end
-
-          result
+          base.joins(definition.joins).where(definition.qualified_column_name => value)
         end
       end
 
       def facet
         my_column = definition.qualified_column_name
         query = "#{my_column} AS facet_value, count(#{my_column}) AS occurrences"
-        counts = without.result.reorder('').joins(definition.joins).select(query).group(my_column)
+        counts = without.result(skip_ordering: true).reorder('').joins(definition.joins).select(query).group(my_column)
         counts.includes_values = []
         facet = counts.map do |c|
           is_selected = selected.include?(c.facet_value)
@@ -100,19 +95,14 @@ module FortyFacets
       def build_scope
         return Proc.new { |base| base } if empty?
         Proc.new do |base|
-          result = base.joins(definition.joins).where(definition.qualified_column_name => values)
-          if definition.joins
-            result = result.distinct
-          end
-
-          result
+          base.joins(definition.joins).where(definition.qualified_column_name => values)
         end
       end
 
       def facet
         my_column = definition.qualified_column_name
         query = "#{my_column} AS foreign_id, count(#{my_column}) AS occurrences"
-        counts = without.result.reorder('').joins(definition.joins).select(query).group(my_column)
+        counts = without.result(skip_ordering: true).reorder('').joins(definition.joins).select(query).group(my_column)
         counts.includes_values = []
         entities_by_id = definition.association.klass.find(counts.map(&:foreign_id)).group_by(&:id)
 
@@ -136,7 +126,7 @@ module FortyFacets
 
           matches_from_facet = base.joins(definition.joins).where("#{definition.association.klass.table_name}.#{definition.association.klass.primary_key}" => values).select(primary_key_column)
 
-          base.joins(definition.joins).where(primary_key_column => matches_from_facet).distinct
+          base.joins(definition.joins).where(primary_key_column => matches_from_facet)
         end
       end
 
@@ -145,7 +135,7 @@ module FortyFacets
         join_name =  [definition.association.name.to_s, base_table.to_s].sort.join('_')
         foreign_id_col = definition.association.name.to_s.singularize + '_id'
         my_column = join_name + '.' + foreign_id_col
-        counts = without.result
+        counts = without.result(skip_ordering: true)
                   .reorder('')
                   .joins(definition.joins)
                   .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")

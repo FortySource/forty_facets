@@ -115,11 +115,14 @@ module FortyFacets
       @orders.find(&:active)
     end
 
-    def result
-      query = @filters.inject(root) do |previous, filter|
+    def result(skip_ordering: false)
+      query = @filters.reject(&:empty?).inject(root) do |previous, filter|
         filter.build_scope.call(previous)
       end
-      query = query.order(order.definition.clause) if order
+
+      unless skip_ordering
+        query = query.order(order.definition.clause) if order
+      end
       query
     end
 
