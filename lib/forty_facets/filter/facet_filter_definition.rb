@@ -1,5 +1,3 @@
-require 'byebug'
-
 module FortyFacets
   class FacetFilterDefinition < FilterDefinition
 
