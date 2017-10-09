@@ -138,7 +138,7 @@ module FortyFacets
         sum[filter.definition.request_param] = filter.value.dup unless filter.empty?
         sum
       end
-      params[:order] = order.definition.request_value if order
+      params[:order] = order.definition.request_value if order && order != @orders.find {|o| o.definition.default}
       params
     end
 
