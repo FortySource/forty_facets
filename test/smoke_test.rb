@@ -23,6 +23,8 @@ class MovieSearch < FortyFacets::FacetSearch
   facet [:studio, :country], name: 'Country'
   facet [:studio, :status], name: 'Studio status'
   facet [:studio, :producers], name: 'Producers'
+  sql_facet({ uschis: "studios.name = 'Uschi'", non_uschis: "studios.name != 'USCHI'" },
+            { name: "Uschis", path: [:studio, :uschis], joins: [:studio] })
   sql_facet({ classic: "year <= 1980", non_classic: "year > 1980" },
             { name: "Classic", path: :classic })
   sql_facet({ classic: "year <= 1980", non_classic: "year > 1980" },
@@ -33,6 +35,12 @@ class MovieSearch < FortyFacets::FacetSearch
 end
 
 class SmokeTest < Minitest::Test
+
+  def test_sql_facet_with_belongs_to
+    search = MovieSearch.new({'studio-uschis' => {}})
+    assert_equal Movie.count, search.result.size
+    assert_equal search.filter([:studio, :uschis]).facet, [FortyFacets::FacetValue.new(:uschis, 0, false), FortyFacets::FacetValue.new(:non_uschis, 40, false)]
+  end
 
   def test_it_finds_all_movies
     search = MovieSearch.new({})
