@@ -3,6 +3,7 @@ module FortyFacets
 
     class FacetFilter < Filter
       def values
+        p 'vales....'
         @values ||= Array.wrap(value).sort.uniq
       end
 
