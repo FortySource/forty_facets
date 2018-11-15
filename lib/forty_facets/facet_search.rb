@@ -123,6 +123,8 @@ module FortyFacets
         filter.build_scope.call(previous)
       end
 
+      p 'result....'
+      
       if order && !skip_ordering
         query = order.apply(query)
       else
