@@ -28,6 +28,8 @@ module FortyFacets
         return Proc.new { |base| base } if empty?
 
         Proc.new do |base|
+          p selected_queries
+          p 'build_scope'
           # intersection of values and definition queries
           base.where(selected_queries.values.map do |query|
             "(#{query})"
@@ -60,6 +62,8 @@ module FortyFacets
         end.join(", ")
         query += ", count(*) as occurrences"
 
+        p 'sql.facet'
+        p query 
         counts = without.result.reorder("")
           .select(query)
           .group(definition.queries.keys)
@@ -71,6 +75,8 @@ module FortyFacets
         counts.map do |count|
           definition.queries.each do |key, _|
             result[key] ||= 0
+            p 'counting...'
+            p count[key]
             if [1, "1", true].include?(count[key])
               result[key] += count.occurrences
             end
