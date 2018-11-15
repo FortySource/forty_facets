@@ -117,6 +117,9 @@ module FortyFacets
 
     def result(skip_ordering: false)
       query = @filters.reject(&:empty?).inject(root) do |previous, filter|
+        p previous 
+        p filter 
+        p '..........'
         filter.build_scope.call(previous)
       end
 
