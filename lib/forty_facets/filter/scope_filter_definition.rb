@@ -2,12 +2,20 @@ module FortyFacets
   class ScopeFilterDefinition < FilterDefinition
     class ScopeFilter < Filter
       def active?
-        value == '1'
+        value.present?
       end
 
       def build_scope
         return Proc.new { |base| base } unless active?
-        Proc.new {  |base| base.send(definition.path.first) }
+        Proc.new {  |base|
+          arity = base.method(definition.path.first.to_sym).arity
+          base.send(definition.path.first, value) 
+          # if arity == 0
+          #   base.send(definition.path.first) 
+          # else 
+          #   base.send(definition.path.first, value) 
+          # end
+        }
       end
 
       def remove
@@ -16,9 +24,9 @@ module FortyFacets
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
 
-      def add
+      def add(value = nil)
         new_params = search_instance.params || {}
-        new_params[definition.request_param] = '1'
+        new_params[definition.request_param] = value
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
     end

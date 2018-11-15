@@ -31,6 +31,7 @@ class MovieSearch < FortyFacets::FacetSearch
             { name: "Classic" })
   text [:studio, :description], name: 'Studio Description'
   scope :classics, 'Name classics'
+  scope :year_lte, 'Year less than or equal'
   custom :needs_complex_filtering
 end
 
@@ -277,9 +278,14 @@ class SmokeTest < Minitest::Test
     search.filter(:studio).facet.reject(&:selected).to_a
   end
 
-  def test_scope_filter
-    search_with_scope = MovieSearch.new().filter(:classics).add
-    assert search_with_scope.result.count < Movie.count, 'Activating the scope should yield a smaller set of movies'
+  # def test_scope_filter
+  #   search_with_scope = MovieSearch.new().filter(:classics).add('1')
+  #   assert search_with_scope.result.count < Movie.count, 'Activating the scope should yield a smaller set of movies'
+  # end
+
+  def test_scope_filter_with_params
+    search_with_scope = MovieSearch.new().filter(:year_lte).add(1980)
+    assert search_with_scope.result.count < Movie.count, 'Activating the scope with filter should yield a smaller set of movies'
   end
 
   def test_custom_filter
