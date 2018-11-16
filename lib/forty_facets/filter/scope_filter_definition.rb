@@ -2,7 +2,7 @@ module FortyFacets
   class ScopeFilterDefinition < FilterDefinition
     class ScopeFilter < Filter
       def active?
-        value.present?
+        definition.options[:pass_value] ? value.present? : '1'
       end
 
       def build_scope
