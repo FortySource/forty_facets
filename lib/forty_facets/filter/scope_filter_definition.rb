@@ -21,7 +21,8 @@ module FortyFacets
         }
       end
 
-      def remove
+      # added value to standardize the API even though it's not used
+      def remove(value = nil)
         new_params = search_instance.params || {}
         new_params.delete(definition.request_param)
         search_instance.class.new_unwrapped(new_params, search_instance.root)
