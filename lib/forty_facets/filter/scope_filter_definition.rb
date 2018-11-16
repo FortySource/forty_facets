@@ -5,6 +5,10 @@ module FortyFacets
         definition.options[:pass_value] ? value.present? : '1'
       end
 
+      def selected 
+        [value]
+      end
+
       def build_scope
         return proc { |base| base } unless active?
 
