@@ -59,7 +59,7 @@ module FortyFacets
           "(#{sql_query}) as #{key}"
         end.join(", ")
         query += ", count(*) as occurrences"
-
+        
         counts = without.result.reorder("")
           .select(query)
           .group(definition.queries.keys)

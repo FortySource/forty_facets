@@ -86,7 +86,6 @@ module FortyFacets
         old_values << value.to_s
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
-
     end
 
     class BelongsToFilter < AssociationFacetFilter

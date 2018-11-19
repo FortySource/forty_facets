@@ -3,7 +3,6 @@ module FortyFacets
   # type of filter. Most FilterDefinitions will have their own Filter subclass
   # to control values for display and rendering to request parameters.
   Filter = Struct.new(:definition, :search_instance, :value) do
-
     FacetValue = Struct.new(:entity, :count, :selected)
 
     def name

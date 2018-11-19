@@ -2,23 +2,35 @@ module FortyFacets
   class ScopeFilterDefinition < FilterDefinition
     class ScopeFilter < Filter
       def active?
-        value == '1'
+        definition.options[:pass_value] ? value.present? : '1'
+      end
+
+      def selected 
+        [value]
       end
 
       def build_scope
-        return Proc.new { |base| base } unless active?
-        Proc.new {  |base| base.send(definition.path.first) }
+        return proc { |base| base } unless active?
+
+        proc { |base|
+          if definition.options[:pass_value]
+            base.send(definition.path.first, value)  
+          else
+            base.send(definition.path.first) 
+          end
+        }
       end
 
-      def remove
+      # added value to standardize the API even though it's not used
+      def remove(value = nil)
         new_params = search_instance.params || {}
         new_params.delete(definition.request_param)
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
 
-      def add
+      def add(value = nil)
         new_params = search_instance.params || {}
-        new_params[definition.request_param] = '1'
+        new_params[definition.request_param] = value
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
     end

@@ -89,6 +89,7 @@ class Movie < ActiveRecord::Base
 
   scope :classics, -> { where("year <= ?", 1980) }
   scope :non_classics, -> { where("year > ?", 1980) }
+  scope :year_lte, -> (year) { where("year > ?", year) }
 end
 
 LOREM = %w{Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren}
