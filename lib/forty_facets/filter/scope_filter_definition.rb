@@ -2,7 +2,7 @@ module FortyFacets
   class ScopeFilterDefinition < FilterDefinition
     class ScopeFilter < Filter
       def active?
-        definition.options[:pass_value] ? value.present? : '1'
+        definition.options[:pass_value] ? value.present? : value == '1'
       end
 
       def selected 
@@ -28,7 +28,7 @@ module FortyFacets
         search_instance.class.new_unwrapped(new_params, search_instance.root)
       end
 
-      def add(value = nil)
+      def add(value = '1')
         new_params = search_instance.params || {}
         new_params[definition.request_param] = value
         search_instance.class.new_unwrapped(new_params, search_instance.root)
@@ -38,7 +38,5 @@ module FortyFacets
     def build_filter(search_instance, value)
       ScopeFilter.new(self, search_instance, value)
     end
-
   end
 end
-
