@@ -25,7 +25,7 @@ module FortyFacets
 
     class AssociationFacetFilter < FacetFilter
       def selected
-        @selected ||= definition.association.klass.find(Array.wrap(values).reject(&:blank?))
+        @selected ||= definition.association.klass.unscoped.find(Array.wrap(values).reject(&:blank?))
       end
 
       def remove(entity)
@@ -101,7 +101,7 @@ module FortyFacets
         query = "#{my_column} AS foreign_id, count(#{my_column}) AS occurrences"
         counts = without.result(skip_ordering: true).distinct.joins(definition.joins).select(query).group(my_column)
         counts.includes_values = []
-        entities_by_id = definition.association.klass.find(counts.map(&:foreign_id)).group_by(&:id)
+        entities_by_id = definition.association.klass.unscoped.find(counts.map(&:foreign_id)).group_by(&:id)
 
         facet = counts.map do |count|
           facet_entity = entities_by_id[count.foreign_id].first
@@ -138,7 +138,7 @@ module FortyFacets
                   .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")
                   .group(my_column)
         counts.includes_values = []
-        entities_by_id = definition.association.klass.find(counts.map(&:foreign_id)).group_by(&:id)
+        entities_by_id = definition.association.klass.unscoped.find(counts.map(&:foreign_id)).group_by(&:id)
 
         facet = counts.map do |count|
           facet_entity = entities_by_id[count.foreign_id].first

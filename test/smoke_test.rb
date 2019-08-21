@@ -2,8 +2,9 @@ require 'coveralls'
 Coveralls.wear!
 
 require "minitest/autorun"
+require 'test_helper'
 require 'logger'
-#require 'byebug'# travis doenst like byebug
+# require 'byebug'# travis doenst like byebug
 require_relative '../lib/forty_facets'
 
 #silence_warnings do
@@ -190,6 +191,20 @@ class SmokeTest < Minitest::Test
 
     assert_equal movies_with_studio.size, search_with_studio.result.size
     assert_equal movies_with_studio.size, first_facet_value.count
+  end
+
+  def test_belongs_to_filter_with_default_scope
+    wrap_in_db_transaction do
+      deleted_studio = Studio.create!(name: 'Deleted studio', status: 'active')
+      movie = Movie.create!(studio: deleted_studio)
+      deleted_studio.update!(deleted_at: Time.now)
+
+      blank_search = MovieSearch.new
+
+      assert_equal(
+        5, blank_search.filter(:studio).facet.length
+      )
+    end
   end
 
   def test_sort_by_proc
