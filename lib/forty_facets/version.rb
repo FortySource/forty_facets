@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FortyFacets
-  VERSION = "0.1.9.1"
+  VERSION = '0.2'
 end

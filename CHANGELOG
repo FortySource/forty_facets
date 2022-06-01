@@ -1,0 +1,8 @@
+# CHANGELOG
+
+## 0.2
+
+- introduction of CHANGELOG
+- upgraded to Ruby 3.1
+- upgraded to ActiveRecrd/Rails 7
+- merged #27
