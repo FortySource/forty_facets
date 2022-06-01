@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module FortyFacets
   class FacetFilterDefinition < FilterDefinition
-
     class FacetFilter < Filter
       def values
         @values ||= Array.wrap(value).sort.uniq
@@ -12,12 +13,12 @@ module FortyFacets
         order_accessor = definition.options[:order]
         if order_accessor
           if order_accessor.is_a?(Proc)
-            facet.sort_by!{|facet_value| order_accessor.call(facet_value.entity) }
+            facet.sort_by! { |facet_value| order_accessor.call(facet_value.entity) }
           else
-            facet.sort_by!{|facet_value| facet_value.entity.send(order_accessor) }
+            facet.sort_by! { |facet_value| facet_value.entity.send(order_accessor) }
           end
         else
-          facet.sort_by!{|facet_value| -facet_value.count }
+          facet.sort_by! { |facet_value| -facet_value.count }
         end
         facet
       end
@@ -49,12 +50,14 @@ module FortyFacets
       def selected
         entity = definition.origin_class
         column = entity.columns_hash[definition.attribute.to_s]
-        values.map{|v| entity.connection.type_cast(v, column)}
+        type = entity.connection.lookup_cast_type_from_column(column)
+        values.map { |value| type.serialize(value) }
       end
 
       def build_scope
-        return Proc.new { |base| base } if empty?
-        Proc.new do |base|
+        return proc { |base| base } if empty?
+
+        proc do |base|
           base.joins(definition.joins).where(definition.qualified_column_name => value)
         end
       end
@@ -90,8 +93,9 @@ module FortyFacets
 
     class BelongsToFilter < AssociationFacetFilter
       def build_scope
-        return Proc.new { |base| base } if empty?
-        Proc.new do |base|
+        return proc { |base| base } if empty?
+
+        proc do |base|
           base.joins(definition.joins).where(definition.qualified_column_name => values)
         end
       end
@@ -115,8 +119,9 @@ module FortyFacets
 
     class HasManyFilter < AssociationFacetFilter
       def build_scope
-        return Proc.new { |base| base } if empty?
-        Proc.new do |base|
+        return proc { |base| base } if empty?
+
+        proc do |base|
           base_table = definition.origin_class.table_name
 
           primary_key_column = "#{base_table}.#{definition.origin_class.primary_key}"
@@ -130,13 +135,13 @@ module FortyFacets
       def facet
         base_table = definition.search.root_class.table_name
         join_name =  [definition.association.name.to_s, base_table.to_s].sort.join('_')
-        foreign_id_col = definition.association.name.to_s.singularize + '_id'
-        my_column = join_name + '.' + foreign_id_col
+        foreign_id_col = "#{definition.association.name.to_s.singularize}_id"
+        my_column = "#{join_name}.#{foreign_id_col}"
         counts = without.result(skip_ordering: true)
-                  .distinct
-                  .joins(definition.joins)
-                  .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")
-                  .group(my_column)
+                        .distinct
+                        .joins(definition.joins)
+                        .select("#{my_column} as foreign_id, count(#{my_column}) as occurrences")
+                        .group(my_column)
         counts.includes_values = []
         entities_by_id = definition.association.klass.unscoped.find(counts.map(&:foreign_id)).group_by(&:id)
 
@@ -152,11 +157,12 @@ module FortyFacets
 
     def build_filter(search_instance, param_value)
       if association
-        if association.macro == :belongs_to
+        case association.macro
+        when :belongs_to
           BelongsToFilter.new(self, search_instance, param_value)
-        elsif association.macro == :has_many
+        when :has_many
           HasManyFilter.new(self, search_instance, param_value)
-        elsif association.macro == :has_and_belongs_to_many
+        when :has_and_belongs_to_many
           HasManyFilter.new(self, search_instance, param_value)
         else
           raise "Unsupported association type: #{association.macro}"

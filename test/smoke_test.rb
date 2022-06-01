@@ -196,7 +196,7 @@ class SmokeTest < Minitest::Test
     studio = first_facet_value.entity
     assert_kind_of Studio, studio
 
-    movies_with_studio = Movie.where(studio: studio)
+    movies_with_studio = Movie.where(studio:)
     search_with_studio = blank_search.filter(:studio).add(studio)
 
     assert_equal movies_with_studio.size, search_with_studio.result.size
@@ -206,7 +206,7 @@ class SmokeTest < Minitest::Test
   def test_belongs_to_filter_with_default_scope
     wrap_in_db_transaction do
       deleted_studio = Studio.create!(name: 'Deleted studio', status: 'active')
-      movie = Movie.create!(studio: deleted_studio)
+      Movie.create!(studio: deleted_studio)
       deleted_studio.update!(deleted_at: Time.now)
 
       blank_search = MovieSearch.new
