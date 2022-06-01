@@ -1,23 +1,27 @@
 module FortyFacets
   class RangeFilterDefinition < FilterDefinition
     class RangeFilter < Filter
+      RANGE_REGEX = /(\d*) - (\d*)/.freeze
+
       def build_scope
         return Proc.new { |base| base } if empty?
 
         Proc.new do |base|
-          base.joins(definition.joins)
-            .where("#{definition.qualified_column_name} >= ? AND #{definition.qualified_column_name} <= ? ", min_value, max_value ) 
+          scope = base.joins(definition.joins)
+          scope = scope.where("#{definition.qualified_column_name} >= ?", min_value) if min_value.present?
+          scope = scope.where("#{definition.qualified_column_name} <= ?", max_value) if max_value.present?
+          scope
         end
       end
 
       def min_value
-        return nil if empty?
-        value.split(' - ').first
+        min, _max = range_values
+        min
       end
 
       def max_value
-        return nil if empty?
-        value.split(' - ').last
+        _min, max = range_values
+        max
       end
 
       def absolute_interval
@@ -32,6 +36,11 @@ module FortyFacets
         absolute_interval.max
       end
 
+      private
+
+      def range_values
+        value&.match(RANGE_REGEX)&.captures
+      end
     end
 
     def build_filter(search_instance, value)

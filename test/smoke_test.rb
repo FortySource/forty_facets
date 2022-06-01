@@ -108,11 +108,20 @@ class SmokeTest < Minitest::Test
   end
 
   def test_range_filter
-    search = MovieSearch.new({'search' => {'price' => '0 - 20'}})
+    search = MovieSearch.new({ 'search' => { 'price' => '0 - 20' } })
     assert_equal Movie.count, search.result.size
 
-    search = MovieSearch.new({'search' => {'price' => '0 - 10'}})
-    assert_equal Movie.all.reject{|m| m.price > 10}.size, search.result.size
+    search = MovieSearch.new({ 'search' => { 'price' => '5 - 10' } })
+    assert_equal Movie.where('price >= ? AND price <= ?', 5, 10).count, search.result.size
+
+    search = MovieSearch.new({ 'search' => { 'price' => '5 - ' } })
+    assert_equal Movie.where('price >= ?', 5).count, search.result.size
+
+    search = MovieSearch.new({ 'search' => { 'price' => ' - 5' } })
+    assert_equal Movie.where('price <= ?', 5).count, search.result.size
+
+    search = MovieSearch.new({ 'search' => { 'price' => '' } })
+    assert_equal Movie.count, search.result.size
   end
 
   def test_text_filter_via_belongs_to
