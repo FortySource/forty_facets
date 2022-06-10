@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.1
+
+- added "ORDER" to Range query to fix integration with Postgres
+
 ## 0.2
 
 - introduction of CHANGELOG

@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 module FortyFacets
   class RangeFilterDefinition < FilterDefinition
     class RangeFilter < Filter
-      RANGE_REGEX = /(\d*) - (\d*)/.freeze
+      RANGE_REGEX = /(\d*) - (\d*)/
 
       def build_scope
-        return Proc.new { |base| base } if empty?
+        return proc { |base| base } if empty?
 
-        Proc.new do |base|
+        proc do |base|
           scope = base.joins(definition.joins)
           scope = scope.where("#{definition.qualified_column_name} >= ?", min_value) if min_value.present?
           scope = scope.where("#{definition.qualified_column_name} <= ?", max_value) if max_value.present?
@@ -25,7 +27,13 @@ module FortyFacets
       end
 
       def absolute_interval
-        @abosultes ||= without.result.reorder('').select("min(#{definition.qualified_column_name}) AS min, max(#{definition.qualified_column_name}) as max").first
+        @abosultes ||=
+          without
+          .result
+          .reorder('')
+          .select("min(#{definition.qualified_column_name}) AS min, max(#{definition.qualified_column_name}) as max")
+          .order("min(#{definition.qualified_column_name})")
+          .first
       end
 
       def absolute_min
